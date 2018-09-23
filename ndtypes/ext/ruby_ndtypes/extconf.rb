@@ -15,6 +15,7 @@ SHA256 = {
 }
 
 def download(url, filename)
+  FileUtils.mkdir_p(File.dirname(filename))
   open(filename, "wb") do |out|
     open(url, "rb") do |inp|
       IO.copy_stream(inp, out)
@@ -28,36 +29,41 @@ def check_sha256(libname, filename)
   expected == actual
 end
 
-def checkout(libname, revision)
+def checkout(libname, revision, dest_dir)
   url = "https://github.com/plures/#{libname}/archive/#{revision}.zip"
-  filename = "#{libname}.zip"
-  download(url, filename)
+  filename = File.join(dest_dir, "#{libname}.zip")
+  unless File.file?(filename) && check_sha256(libname, filename)
+    download(url, filename)
+  end
   unless check_sha256(libname, filename)
     abort "sha256 mismatch in #{libname}-#{revision}"
   end
-  system('unzip', '-xo', filename)
+  system('unzip', '-xo', filename, '-d', dest_dir)
 end
 
-def build_library(libname, revision)
+def build_library(libname, revision, src_dir)
   prefix = File.expand_path("../../..", __FILE__)
   cc = RbConfig.expand("$(CC)")
   cpp = RbConfig.expand("$(CPP)")
   dirname = "#{libname}-#{revision}"
-  Dir.chdir(dirname) do
-    puts "Enter #{dirname}"
+  Dir.chdir(File.join(src_dir, dirname)) do
+    puts "Enter #{Dir.pwd}"
     system "./configure --prefix='#{prefix}' CC='#{cc}' CPP='#{cpp}'"
     system "make"
     system "make check"
     system "make install" or abort
+    append_cppflags("-I#{File.join(prefix, 'include')}")
+    $LIBPATH << File.join(prefix, "lib")
   ensure
-    puts "Leave #{dirname}"
+    puts "Leave #{Dir.pwd}"
   end
 end
 
 def download_and_build_library(libname)
+  vendor_dir = File.expand_path("../../../vendor", __FILE__)
   revision = LIBRARY_REVISIONS[libname]
-  checkout(libname, revision)
-  build_library(libname, revision)
+  checkout(libname, revision, vendor_dir)
+  build_library(libname, revision, vendor_dir)
 end
 
 $INSTALLFILES = [
@@ -67,8 +73,10 @@ $INSTALLFILES = [
 ["ndtypes"].each do |lib|
   dir_config(lib)
   found = find_library(lib, nil, "/home/sameer/gitrepos/plures-ruby/build/lib/")
-  download_and_build_library(lib) unless found
-  abort
+  unless found
+    download_and_build_library(lib)
+    have_library(lib)
+  end
 end
 
 ["ndtypes.h"].each do |header|
