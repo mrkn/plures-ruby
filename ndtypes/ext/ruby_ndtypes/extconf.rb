@@ -5,14 +5,16 @@ $INSTALLFILES = [
   ["ruby_ndtypes.h", "$(archdir)"]
 ]
 
-["ndtypes"].each do |lib|
-  dir_config(lib)
-  found = find_library(lib, nil, "/home/sameer/gitrepos/plures-ruby/build/lib/")
-  unless found
-    PluresExtconfHelper.download_and_build_library(lib) or abort
-  end
-  have_library(lib)
+dir_config('ndtypes')
+found = find_library('ndtypes', nil, "/home/sameer/gitrepos/plures-ruby/build/lib/")
+unless found
+  prefix = File.expand_path("../../..", __FILE__)
+  vendor_dir = File.join(prefix, 'vendor')
+  PluresExtconfHelper.download_and_build_library(
+    'ndtypes', prefix, vendor_dir
+  ) or abort
 end
+have_library('ndtypes')
 
 ["ndtypes.h"].each do |header|
   find_header(header, "/home/sameer/gitrepos/plures-ruby/build/include")

@@ -59,7 +59,7 @@ module PluresExtconfHelper
         download(url, filename)
       end
       if check_sha256(libname, filename)
-        true
+        system('unzip', '-xo', filename, '-d', dest_dir)
       else
         $stderr.puts "SHA256 mismatch in #{libname}"
         false
@@ -67,13 +67,19 @@ module PluresExtconfHelper
     end
   end
 
-  def build_library(libname, revision, src_dir, prefix)
+  def build_library(libname, revision, src_dir, prefix, configure_opts:)
     cc = RbConfig.expand("$(CC)")
     cpp = RbConfig.expand("$(CPP)")
     dirname = "#{libname}-#{revision}"
     Dir.chdir(File.join(src_dir, dirname)) do
       puts "Enter #{Dir.pwd}"
-      system "./configure --prefix='#{prefix}' CC='#{cc}' CPP='#{cpp}'" or return false
+      opts = [
+        "--prefix='#{prefix}'",
+        "CC='#{cc}'",
+        "CPP='#{cpp}'",
+        *configure_opts.map {|k, v| "#{k}='#{v}'" }
+      ]
+      system "./configure #{opts.join(' ')}" or return false
       system "make" or return false
       system "make check" or return false
       system "make install" or return false
@@ -83,13 +89,12 @@ module PluresExtconfHelper
     true
   end
 
-  def check_build_library(libname, revision, src_dir)
-    prefix = File.expand_path("../../..", __FILE__)
+  def check_build_library(libname, revision, src_dir, prefix, configure_opts:)
     includedir = File.join(prefix, 'include')
     libdir = File.join(prefix, "lib")
 
     success = check_message_for "building #{libname} " do
-      build_library(libname, revision, src_dir, prefix)
+      build_library(libname, revision, src_dir, prefix, configure_opts: configure_opts)
     end
 
     if success
@@ -100,10 +105,9 @@ module PluresExtconfHelper
     end
   end
 
-  def download_and_build_library(libname, headername=nil)
-    vendor_dir = File.expand_path("../../../vendor", __FILE__)
+  def download_and_build_library(libname, prefix, vendor_dir, configure_opts: {})
     revision = LIBRARY_REVISIONS[libname]
     checkout(libname, revision, vendor_dir) and
-      check_build_library(libname, revision, vendor_dir)
+      check_build_library(libname, revision, vendor_dir, prefix, configure_opts: configure_opts)
   end
 end
