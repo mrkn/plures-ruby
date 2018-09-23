@@ -43,6 +43,8 @@ end
 
 def build_library(libname, revision, src_dir)
   prefix = File.expand_path("../../..", __FILE__)
+  includedir = File.join(prefix, 'include')
+  libdir = File.join(prefix, "lib")
   cc = RbConfig.expand("$(CC)")
   cpp = RbConfig.expand("$(CPP)")
   dirname = "#{libname}-#{revision}"
@@ -52,11 +54,13 @@ def build_library(libname, revision, src_dir)
     system "make"
     system "make check"
     system "make install" or abort
-    append_cppflags("-I#{File.join(prefix, 'include')}")
-    $LIBPATH << File.join(prefix, "lib")
   ensure
     puts "Leave #{Dir.pwd}"
   end
+  append_cppflags("-I#{includedir}")
+  append_ldflags("-Wl,-rpath #{libdir}")
+  $LIBPATH << libdir
+  $libs = append_library($libs, libname)
 end
 
 def download_and_build_library(libname)
