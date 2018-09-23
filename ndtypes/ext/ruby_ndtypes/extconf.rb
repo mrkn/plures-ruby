@@ -10,8 +10,8 @@ $INSTALLFILES = [
   found = find_library(lib, nil, "/home/sameer/gitrepos/plures-ruby/build/lib/")
   unless found
     PluresExtconfHelper.download_and_build_library(lib) or abort
-    have_library(lib)
   end
+  have_library(lib)
 end
 
 ["ndtypes.h"].each do |header|
