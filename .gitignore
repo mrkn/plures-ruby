@@ -52,6 +52,25 @@ gumath/tmp/
 gumath/Gemfile.lock
 gumath/lib/ruby_gumath.so
 
+xnd/lib/lib*.a
+xnd/lib/lib*.so
+xnd/lib/lib*.dylib
+xnd/include
+xnd/share
+xnd/vendor
+ndtypes/lib/lib*.a
+ndtypes/lib/lib*.so
+ndtypes/lib/lib*.dylib
+ndtypes/include
+ndtypes/share
+ndtypes/vendor
+gumath/lib/lib*.a
+gumath/lib/lib*.so
+gumath/lib/lib*.dylib
+gumath/include
+gumath/share
+gumath/vendor
+
 GPATH
 GRTAGS
 GTAGS
