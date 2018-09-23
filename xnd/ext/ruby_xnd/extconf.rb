@@ -1,11 +1,11 @@
 require 'mkmf'
 
-["ndtypes", "xnd", "gumath"].each do |lib|
+["ndtypes", "xnd"].each do |lib|
   find_library(lib, nil, "/home/sameer/gitrepos/plures-ruby/build/lib/")
   have_library(lib)
 end
 
-["ndtypes.h", "xnd.h", "gumath.h", "ruby_ndtypes.h"].each do |header|
+["ndtypes.h", "xnd.h" "ruby_ndtypes.h"].each do |header|
   find_header(header, "/home/sameer/gitrepos/plures-ruby/build/include")
   have_header(header)
 end
