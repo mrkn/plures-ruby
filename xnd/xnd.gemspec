@@ -21,7 +21,9 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
-  
+
+  spec.add_dependency 'ndtypes'
+
   spec.add_development_dependency 'rspec', '~> 3.8'
   spec.add_development_dependency 'rake-compiler'
   spec.add_development_dependency 'pry'

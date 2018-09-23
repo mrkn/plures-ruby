@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 gemspec
 
-gem 'ndtypes', path: "/home/sameer/gitrepos/plures-ruby/ndtypes"
+gem 'ndtypes', path: File.expand_path("../../ndtypes", __FILE__)
